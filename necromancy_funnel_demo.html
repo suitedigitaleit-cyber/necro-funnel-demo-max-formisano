@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Necromancy Funnel – Demo Cliente Premium</title>
+  <style>
+    *{box-sizing:border-box}
+    :root{
+      --bg:#0A0713;
+      --panel:#161224;
+      --panel2:#1D1730;
+      --line:rgba(255,255,255,.10);
+      --text:#F7F3FF;
+      --muted:#C6BDD9;
+      --accent:#8B5CF6;
+      --accent2:#A855F7;
+      --good:#38D39F;
+      --bad:#F97373;
+      --warn:#F8B84E;
+      --shadow:0 24px 80px rgba(0,0,0,.45);
+    }
+    html,body{margin:0;padding:0;background:radial-gradient(circle at top,#1B1330 0%,#0D0A16 42%,#07050D 100%);color:var(--text);font-family:Roboto,Arial,sans-serif}
+    .wrap{width:100%;max-width:none;margin:0;padding:12px 0 40px}
+    .hero{display:block;margin-bottom:18px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);backdrop-filter:blur(14px)}
+    .hero-main{padding:30px}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#E8DEFF;margin-bottom:14px}
+    h1{margin:0 0 12px;font-size:clamp(34px,4vw,58px);line-height:1.02}
+    .hero-main p{margin:0;color:var(--muted);font-size:17px;line-height:1.72;max-width:860px}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}
+    .metric{padding:18px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .metric strong{display:block;font-size:28px;margin-bottom:4px}
+    .metric span{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+    .hero-side{display:none}
+    .main{display:grid;grid-template-columns:320px 1fr;gap:18px}
+    .controls{padding:20px;position:sticky;top:16px;height:fit-content}
+    .controls h3{margin:0 0 8px;font-size:16px}
+    .controls p{margin:0 0 14px;color:var(--muted);font-size:14px;line-height:1.65}
+    .email-picker{display:grid;gap:10px;margin-bottom:12px}
+    .pick{width:100%;text-align:left;padding:14px 14px;border-radius:16px;border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.04);color:var(--text);cursor:pointer;transition:.25s ease;font-family:inherit}
+    .pick:hover,.pick.active{border-color:rgba(139,92,246,.55);background:rgba(139,92,246,.14);transform:translateY(-1px)}
+    .pick small{display:block;color:var(--muted);margin-top:4px;font-size:12px}
+    .ctrl-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+    .btn{padding:14px 14px;border-radius:16px;border:0;font-weight:700;cursor:pointer;font-family:inherit}
+    .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 14px 36px rgba(139,92,246,.28)}
+    .btn.secondary{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);color:var(--text)}
+    .status{margin-top:12px;padding:14px 16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:13px;line-height:1.65;color:var(--muted)}
+    .status strong{color:#fff}
+    .visual{display:grid;gap:18px}
+    .stage{padding:22px}
+    .stage-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+    .stage-head h2{margin:0 0 8px;font-size:30px;line-height:1.05}
+    .stage-head p{margin:0;color:var(--muted);font-size:14px;line-height:1.7;max-width:860px}
+    .stage-pill{padding:10px 14px;border-radius:999px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);font-size:13px;white-space:nowrap}
+    .tree{display:grid;gap:28px;overflow:auto;padding-bottom:4px}
+    .step-block{display:none;opacity:0;transform:translateY(16px);transition:.35s ease}
+    .step-block.show{display:block;opacity:1;transform:translateY(0)}
+    .step-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .step-n{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:800}
+    .step-top strong{font-size:22px}
+    .step-top span{display:block;font-size:13px;color:var(--muted)}
+    .seed{max-width:460px;padding:18px;border-radius:24px;background:linear-gradient(180deg,rgba(139,92,246,.20),rgba(139,92,246,.08));border:1px solid rgba(139,92,246,.45);box-shadow:0 16px 40px rgba(139,92,246,.16)}
+    .seed .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#E4D9FF;margin-bottom:10px}
+    .seed strong{display:block;font-size:20px;margin-bottom:8px}
+    .seed p{margin:0;color:#F0E9FF;font-size:14px;line-height:1.7}
+    .seed .t{display:inline-flex;margin-top:12px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);font-size:12px}
+    .branches{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding-top:30px;min-width:980px}
+    .branches:before{content:"";position:absolute;top:0;left:12.5%;right:12.5%;height:2px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(139,92,246,.7),rgba(255,255,255,.06))}
+    .branch{position:relative;padding-top:24px}
+    .branch:before{content:"";position:absolute;left:50%;top:0;width:2px;height:24px;background:linear-gradient(180deg,rgba(139,92,246,.75),rgba(139,92,246,.14))}
+    .opt{height:100%;padding:18px;border-radius:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.10);cursor:pointer;transition:.25s ease;position:relative;overflow:hidden}
+    .opt:hover{transform:translateY(-4px);border-color:rgba(139,92,246,.45);box-shadow:0 18px 40px rgba(139,92,246,.12)}
+    .opt.active{border-color:rgba(139,92,246,.75);background:linear-gradient(180deg,rgba(139,92,246,.18),rgba(139,92,246,.07));box-shadow:0 18px 40px rgba(139,92,246,.16)}
+    .opt.hot{border-color:rgba(56,211,159,.55);background:linear-gradient(180deg,rgba(56,211,159,.16),rgba(56,211,159,.05));box-shadow:0 18px 40px rgba(56,211,159,.12)}
+    .opt.bad{border-color:rgba(249,115,115,.42)}
+    .opt .top{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#D9D0EE;margin-bottom:10px}
+    .opt strong{display:block;font-size:18px;line-height:1.15;margin-bottom:8px}
+    .opt p{margin:0;color:var(--muted);font-size:13px;line-height:1.7}
+    .opt .otag{display:inline-flex;margin-top:12px;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);font-size:12px;color:#F0E7FF}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .card{padding:22px}
+    .card h3{margin:0 0 14px;font-size:20px}
+    .screen{min-height:280px;padding:18px;border-radius:24px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+    .screen-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:14px}
+    .screen-title{font-size:14px;color:#DED2FF}
+    .screen-pill{padding:8px 11px;border-radius:999px;background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);font-size:12px}
+    .email-shell,.wa-shell,.crm-shell{padding:16px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+    .subject{font-size:15px;font-weight:700;margin-bottom:8px}
+    .meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+    .body{font-size:14px;line-height:1.75;color:#F1EBFF;white-space:pre-line}
+    .cta-chip{display:inline-flex;margin-top:14px;padding:10px 14px;border-radius:999px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.35);font-size:13px}
+    .crm-list{display:grid;gap:10px}
+    .crm-item{display:grid;grid-template-columns:38px 1fr;gap:10px;align-items:flex-start;padding:12px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+    .crm-icon{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+    .crm-item strong{display:block;font-size:14px;margin-bottom:3px}
+    .crm-item span{display:block;font-size:12px;line-height:1.6;color:var(--muted)}
+    .timeline{display:grid;gap:10px}
+    .timeline-row{display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+    .timeline-row:last-child{border-bottom:0}
+    .timeline-row strong{font-size:13px;color:#F0E8FF}
+    .timeline-row span{font-size:13px;color:var(--muted);line-height:1.6}
+    .footer-note{font-size:14px;line-height:1.8;color:var(--muted)}
+    @media (max-width:1180px){.hero,.main,.grid{grid-template-columns:1fr}.controls{position:static}.metrics{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:760px){.metrics{grid-template-columns:1fr}.timeline-row{grid-template-columns:1fr;gap:4px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="panel hero-main">
+        <div class="badge">Necromancy Funnel • Demo Cliente Ultra Premium</div>
+        <h1>Ogni lead prende una strada diversa. E ogni strada genera un’azione precisa.</h1>
+        <p>Questa demo mostra esattamente cosa succede ai lead di Max Formisano dentro l’Operazione Necromancy. Si parte da una email reale del funnel. In base al comportamento del lead, il flusso si biforca e cambia messaggio, canale, pipeline e intervento operativo.</p>
+        <div class="metrics">
+          <div class="metric"><strong>45</strong><span>giorni di lavoro distribuiti nel funnel</span></div>
+          <div class="metric"><strong>10</strong><span>follow-up che cambiano in base alle azioni</span></div>
+          <div class="metric"><strong>WhatsApp</strong><span>attivato solo dopo un segnale più profondo</span></div>
+          <div class="metric"><strong>Setter</strong><span>interviene solo dopo compilazione form</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="main">
+      <aside class="panel controls">
+        <h3>Scegli il punto di partenza</h3>
+        <p>Seleziona una delle 10 email. Poi clicca direttamente sulle opzioni dentro lo step 1, step 2 e step 3.</p>
+        <div class="email-picker" id="emailPicker"></div>
+        <div class="ctrl-row">
+          <button class="btn secondary" id="backBtn">Torna indietro</button>
+          <button class="btn primary" id="resetBtn">Reset funnel</button>
+        </div>
+        <div class="status" id="statusBox"><strong>Stato:</strong> pronto. Scegli una email e poi seleziona una delle quattro azioni nello step 1.</div>
+      </aside>
+
+      <div class="visual">
+        <div class="panel stage">
+          <div class="stage-head">
+            <div>
+              <h2 id="stageTitle"></h2>
+              <p id="stageDesc"></p>
+            </div>
+            <div class="stage-pill" id="stagePill"></div>
+          </div>
+
+          <div class="tree">
+            <div class="step-block show" id="stepBlock1"></div>
+            <div class="step-block" id="stepBlock2"></div>
+            <div class="step-block" id="stepBlock3"></div>
+            <div class="step-block" id="stepBlock4"></div>
+            <div class="step-block" id="stepBlock5"></div>
+            <div class="step-block" id="stepBlock6"></div>
+            <div class="step-block" id="stepBlock7"></div>
+            <div class="step-block" id="stepBlock8"></div>
+            <div class="step-block" id="stepBlock9"></div>
+            <div class="step-block" id="stepBlock10"></div>
+            <div class="step-block" id="stepBlock11"></div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="panel card">
+            <h3>Messaggio o canale attivo</h3>
+            <div class="screen">
+              <div class="screen-head"><div class="screen-title">Touchpoint corrente</div><div class="screen-pill" id="touchPill">Email</div></div>
+              <div id="touchArea"></div>
+            </div>
+          </div>
+
+          <div class="panel card">
+            <h3>Esito del ramo selezionato</h3>
+            <div class="screen">
+              <div class="screen-head"><div class="screen-title">Azione che scatta ora</div><div class="screen-pill" id="outcomePill">Outcome</div></div>
+              <div id="outcomeArea"></div>
+            </div>
+          </div>
+
+          <div class="panel card">
+            <h3>Timeline del percorso scelto</h3>
+            <div class="timeline" id="timelineList"></div>
+          </div>
+
+          <div class="panel card">
+            <h3>Stato finale del lead</h3>
+            <div class="screen" id="finalStateBox"></div>
+          </div>
+        </div>
+
+        <div class="panel card">
+          <h3>Perché questa demo vende</h3>
+          <div class="footer-note">Questa visual non spiega un funnel in modo teorico. Mostra cosa succede davvero ai lead, passaggio dopo passaggio. Il cliente non vede “email marketing”. Vede un sistema che reagisce a ogni comportamento e trasforma ogni contatto in un processo operativo misurabile.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const emails = [
+      {id:1,day:'Giorno 1',phase:'Riattivazione',name:'Email 1 – Re-open',subject:'Una cosa veloce per te',body:'Ti contatto perché in passato hai già scelto una delle risorse di Max.\\nNegli ultimi mesi stiamo osservando un pattern interessante: molti che si erano fermati a un frontend stanno sbloccando risultati molto più forti quando entrano nel percorso giusto.',cta:'Apri il contenuto'},
+      {id:2,day:'Giorno 4',phase:'Riattivazione',name:'Email 2 – Memoria',subject:'Ti ricordi quando hai scelto [risorsa]?',body:'Non ti scrivo per venderti qualcosa a freddo.\\nTi scrivo perché chi ha acquistato quel tipo di contenuto spesso si blocca proprio nel passaggio più importante: trasformare l’interesse in un cambiamento strutturato.',cta:'Approfondisci'},
+      {id:3,day:'Giorno 8',phase:'Riattivazione',name:'Email 3 – Curiosità',subject:'Negli ultimi mesi è cambiata una cosa importante',body:'C’è una differenza enorme tra chi accumula contenuti e chi entra in un processo che produce davvero trasformazione.\\nEd è proprio qui che si crea il salto.',cta:'Vedi cosa intendo'},
+      {id:4,day:'Giorno 12',phase:'Attivazione',name:'Email 4 – Insight',subject:'L’errore più comune dopo un frontend',body:'Molti si fermano troppo presto.\\nNon per mancanza di volontà, ma perché senza una struttura guidata il risultato resta parziale.',cta:'Capisci se riguarda anche te'},
+      {id:5,day:'Giorno 17',phase:'Attivazione',name:'Email 5 – Caso reale',subject:'Quando il passo successivo cambia tutto',body:'Alcune persone che avevano iniziato da una risorsa piccola hanno poi sbloccato risultati molto più profondi quando sono entrate nel percorso completo.',cta:'Guarda il quadro completo'},
+      {id:6,day:'Giorno 22',phase:'Attivazione',name:'Email 6 – Selezione',subject:'Questo non è il passo giusto per tutti',body:'Non tutti sono nel momento giusto.\\nMa per chi sente che è arrivato il momento di fare ordine e accelerare, questa può essere una scelta importante.',cta:'Verifica se ha senso'},
+      {id:7,day:'Giorno 28',phase:'Conversione',name:'Email 7 – Invito',subject:'Sto aprendo alcune call',body:'In questi giorni stiamo aprendo alcune conversazioni mirate per capire chi può davvero beneficiare del percorso.\\nSe ha senso, il prossimo passo è semplice.',cta:'Compila il form'},
+      {id:8,day:'Giorno 33',phase:'Conversione',name:'Email 8 – Urgenza soft',subject:'Chiudiamo tra poco questa finestra',body:'Non è una spinta artificiale.\\nÈ semplicemente il momento in cui decidiamo chi seguire in modo più diretto e chi invece lasciare fuori da questo ciclo.',cta:'Richiedi il contatto'},
+      {id:9,day:'Giorno 39',phase:'Conversione',name:'Email 9 – Last call',subject:'Chiudo qui',body:'Ti lascio quest’ultimo passaggio perché, se c’è davvero interesse, questo è il momento giusto per farti avanti e capire se ha senso approfondire.',cta:'Fai il passo ora'},
+      {id:10,day:'Giorno 45',phase:'Recovery',name:'Email 10 – Recovery',subject:'Forse non è il momento',body:'Può darsi che adesso non sia la fase giusta.\\nMa se vuoi, puoi comunque lasciare un segnale e farti ricontattare quando sentirai che è arrivato il momento corretto.',cta:'Lascia il tuo segnale'}
+    ];
+
+    const state = { emailId:1, path:[] };
+    const MAX_STEPS = 10;
+
+    const getEmail = id => emails.find(e => e.id === id);
+    const nextEmailId = id => Math.min(id + 1, emails.length);
+    const emailShell = (e, metaText, bodyText, ctaText) => `
+      <div class="email-shell">
+        <div class="subject">${e.subject}</div>
+        <div class="meta">${metaText}</div>
+        <div class="body">${bodyText}</div>
+        <div class="cta-chip">${ctaText}</div>
+      </div>`;
+    const waShell = (title, body) => `
+      <div class="wa-shell">
+        <div class="subject">${title}</div>
+        <div class="meta">Follow-up comportamentale WhatsApp</div>
+        <div class="body">${body}</div>
+        <div class="cta-chip">Obiettivo: risposta o form</div>
+      </div>`;
+    const crmShell = (items) => `
+      <div class="crm-shell"><div class="crm-list">${items.map(i => `<div class="crm-item"><div class="crm-icon">${i.icon}</div><div><strong>${i.title}</strong><span>${i.text}</span></div></div>`).join('')}</div></div>`;
+
+    function finalItems(status){
+      const map = {
+        'Numero non corretto': [
+          {icon:'ER', title:'Pipeline: numero errato', text:'Il lead viene spostato nello stage corretto.'},
+          {icon:'TK', title:'Task verifica contatto', text:'Il team riceve un’attività per controllo dati.'}
+        ],
+        'Non risponde': [
+          {icon:'RC', title:'Pipeline: da richiamare', text:'Il lead viene tenuto vivo senza dispersione.'},
+          {icon:'WA', title:'Follow-up o nuovo tentativo', text:'Si prepara una nuova azione operativa coerente.'}
+        ],
+        'Risponde e prenota': [
+          {icon:'CL', title:'Pipeline: call prenotata', text:'Il lead entra nel passaggio più vicino alla vendita.'},
+          {icon:'RM', title:'Reminder automatici', text:'Il sistema supporta il passaggio alla call.'}
+        ],
+        'Non interessato': [
+          {icon:'NO', title:'Pipeline: non interessato', text:'Lo stato viene registrato in modo chiaro.'},
+          {icon:'ST', title:'Stop pressione commerciale', text:'Si interrompono le azioni invasive.'}
+        ],
+        'Non è in target': [
+          {icon:'OT', title:'Pipeline: fuori target', text:'Il lead viene escluso dal percorso commerciale.'},
+          {icon:'EX', title:'Esclusione future azioni', text:'Si evita di sprecare budget e tempo.'}
+        ],
+        'Flusso concluso': [
+          {icon:'FX', title:'Fine flusso', text:'Il lead ha raggiunto uno stato finale.'},
+          {icon:'OK', title:'Nessun ulteriore step', text:'Il funnel si interrompe qui.'}
+        ]
+      };
+      return map[status] || [{icon:'FX', title:'Stato finale', text:status}];
+    }
+
+    function finalStep(status){
+      return {
+        seedTitle:`Stato finale: ${status}`,
+        seedText:'Il funnel si interrompe qui, perché il lead ha raggiunto uno stato operativo chiaro. Da questo punto in poi resta solo la gestione interna coerente con l’esito registrato.',
+        seedNote:'Fine flusso',
+        seedKind:'final',
+        options:[]
+      };
+    }
+
+    function setterStep(){
+      return {
+        seedTitle:'Setter attivato',
+        seedText:'Da qui il setter interviene con un obiettivo preciso: portare il lead alla chiamata di vendita. Tutto il funnel precedente serviva ad arrivare qui nel momento giusto.',
+        seedNote:'Obiettivo: call di vendita',
+        seedKind:'setter',
+        options:[
+          {id:'set_wrong', title:'Il numero non è corretto', text:'Il contatto non è raggiungibile telefonicamente. Si aggiorna la pipeline e si attiva una verifica dati.', tag:'Pipeline: numero errato', cls:'bad', next:{kind:'final', status:'Numero non corretto'}, timeline:[['0 min','Setter tenta il contatto'],['Esito','Numero errato'],['Dopo','Task verifica contatto']]},
+          {id:'set_no_answer', title:'Non risponde', text:'Il setter prova il contatto ma il lead non risponde. Il funnel lo sposta nella fase “da richiamare”.', tag:'Pipeline: da richiamare', cls:'', next:{kind:'final', status:'Non risponde'}, timeline:[['0 min','Tentativo di contatto'],['Esito','Nessuna risposta'],['Dopo','Nuovo tentativo + follow-up']]},
+          {id:'set_booked', title:'Risponde e prenota', text:'Lo scenario migliore. Il setter porta il lead alla call di vendita e aggiorna la pipeline.', tag:'Pipeline: call prenotata', cls:'hot', next:{kind:'final', status:'Risponde e prenota'}, timeline:[['0 min','Contatto setter'],['Esito','Call prenotata'],['Dopo','Reminder automatici']]},
+          {id:'set_not_interested', title:'Risponde ma non è interessato', text:'Il lead risponde ma non vuole proseguire. La pipeline viene aggiornata e si interrompe la pressione commerciale.', tag:'Pipeline: non interessato', cls:'bad', next:{kind:'final', status:'Non interessato'}, timeline:[['0 min','Contatto setter'],['Esito','Non interessato'],['Dopo','Stop push commerciale']]},
+          {id:'set_out_target', title:'Non è in target', text:'Il lead non rientra nel profilo corretto. La pipeline lo registra e il funnel evita sprechi futuri.', tag:'Pipeline: fuori target', cls:'bad', next:{kind:'final', status:'Non è in target'}, timeline:[['0 min','Contatto setter'],['Esito','Fuori target'],['Dopo','Esclusione dalle azioni commerciali']]}
+        ]
+      };
+    }
+
+    function stepData(stepNo, emailId, path){
+      const prev = path[stepNo-2] || null;
+
+      if(prev && prev.next && prev.next.kind === 'setter') return setterStep();
+      if(prev && prev.next && prev.next.kind === 'final') return finalStep(prev.next.status);
+
+      const currentEmailId = stepNo === 1 ? emailId : ((prev && prev.next && prev.next.emailId) ? prev.next.emailId : Math.min(emailId + stepNo - 1, emails.length));
+      const e = getEmail(currentEmailId);
+
+      if(stepNo <= MAX_STEPS){
+        const variantFromPrev = prev && prev.next && prev.next.variant ? prev.next.variant : (stepNo===1 ? 'Start' : 'B');
+        const emailTitle = stepNo === 1 ? e.name : `${e.name} • Variante ${variantFromPrev}`;
+        const emailBody = stepNo === 1 ? e.body : `Questa è la variante ${variantFromPrev} di ${e.name}. Il testo cambia in base al comportamento rilevato nello step precedente, così ogni lead riceve un follow-up coerente.`;
+
+        return {
+          seedTitle: emailTitle,
+          seedText: emailBody,
+          seedNote: `${e.day} • ${e.phase}`,
+          seedKind:'email',
+          options: [
+            {
+              id:`s${stepNo}_no_open`,
+              title:'Non apre',
+              text:`Il lead non apre ${e.name}. Il funnel prepara la variante A del touchpoint successivo.`,
+              tag:`${stepNo < MAX_STEPS ? `${getEmail(nextEmailId(e.id)).name} A` : 'Recovery soft'}`,
+              cls:'bad',
+              next:{kind:'email', emailId: stepNo < MAX_STEPS ? nextEmailId(e.id) : e.id, variant:'A', sampleSubject:`[A] ${getEmail(stepNo < MAX_STEPS ? nextEmailId(e.id) : e.id).subject}`},
+              timeline:[['0 min',`${e.name} inviata`],['+48h','Nessuna apertura'],['Step dopo', stepNo < MAX_STEPS ? `${getEmail(nextEmailId(e.id)).name} • Variante A` : 'Chiusura ciclo / recovery finale']]
+            },
+            {
+              id:`s${stepNo}_open`,
+              title:'Apre ma non clicca',
+              text:`Il lead apre ${e.name} ma non clicca. Il funnel prepara la variante B dello step successivo.`,
+              tag:`${stepNo < MAX_STEPS ? `${getEmail(nextEmailId(e.id)).name} B` : 'Ultimo nurture'}`,
+              cls:'',
+              next:{kind:'email', emailId: stepNo < MAX_STEPS ? nextEmailId(e.id) : e.id, variant:'B', sampleSubject:`[B] ${getEmail(stepNo < MAX_STEPS ? nextEmailId(e.id) : e.id).subject}`},
+              timeline:[['0 min',`${e.name} inviata`],['+4 / +24h','Apertura registrata'],['Step dopo', stepNo < MAX_STEPS ? `${getEmail(nextEmailId(e.id)).name} • Variante B` : 'Fine nurture / attesa nuovo trigger']]
+            },
+            {
+              id:`s${stepNo}_click`,
+              title:'Apre e clicca',
+              text:`Il click su ${e.name} è un segnale forte. Il funnel attiva WhatsApp e lavora il lead sul ramo caldo.`,
+              tag:'WhatsApp attivato',
+              cls:'hot',
+              next:{kind:'whatsapp', emailId: stepNo < MAX_STEPS ? nextEmailId(e.id) : e.id, variant:'C', sampleWa:'Ciao, ho visto che hai approfondito il contenuto che ti abbiamo inviato…'},
+              timeline:[['0 min',`${e.name} inviata`],['+4 / +24h','Apertura + click'],['+2 / +5 min','WhatsApp contestuale']]
+            },
+            {
+              id:`s${stepNo}_form`,
+              title:'Compila il form',
+              text:`Il lead compila il form dopo ${e.name}. Il nurture si interrompe immediatamente e dal prossimo step entra il setter.`,
+              tag:'Stop messaggi + setter',
+              cls:'hot',
+              next:{kind:'setter'},
+              timeline:[['0 min',`${e.name} inviata`],['+evento','Form compilato'],['Subito','Stop messaggi successivi'],['Step dopo','Setter attivato']] 
+            }
+          ]
+        };
+      }
+
+      return null;
+    }
+
+    function renderPicker(){
+      const wrap = document.getElementById('emailPicker');
+      wrap.innerHTML = emails.map(e => `<button class="pick ${e.id===state.emailId?'active':''}" data-id="${e.id}">${e.name}<small>${e.day} • ${e.phase}</small></button>`).join('');
+      wrap.querySelectorAll('.pick').forEach(btn => btn.addEventListener('click', ()=>{
+        state.emailId = Number(btn.dataset.id);
+        state.path = [];
+        renderAll();
+      }));
+    }
+
+    function renderStepBlock(stepNo){
+      const block = document.getElementById(`stepBlock${stepNo}`);
+      if(!block) return;
+      const data = stepData(stepNo, state.emailId, state.path);
+      if(!data){ block.classList.remove('show'); block.innerHTML=''; return; }
+      if(data.options.length===0){
+        block.innerHTML = `
+          <div class="step-top"><div class="step-n">${stepNo}</div><div><strong>Step ${stepNo}</strong><span>Stato finale</span></div></div>
+          <div class="seed"><div class="k">Esito finale</div><strong>${data.seedTitle}</strong><p>${data.seedText}</p><div class="t">${data.seedNote}</div></div>`;
+        block.classList.add('show');
+        return;
+      }
+      const seedClass = data.seedKind === 'setter'
+        ? 'background:linear-gradient(180deg,rgba(56,211,159,.18),rgba(56,211,159,.06));border:1px solid rgba(56,211,159,.45);box-shadow:0 16px 40px rgba(56,211,159,.12);'
+        : 'background:linear-gradient(180deg,rgba(139,92,246,.20),rgba(139,92,246,.08));border:1px solid rgba(139,92,246,.45);box-shadow:0 16px 40px rgba(139,92,246,.16);';
+      const seedIcon = data.seedKind === 'setter' ? '📞' : '✉️';
+      block.innerHTML = `
+        <div class="step-top"><div class="step-n">${stepNo}</div><div><strong>Step ${stepNo}</strong><span>Scegli uno dei rami disponibili</span></div></div>
+        <div class="seed" style="${seedClass}"><div class="k">Punto di partenza dello step</div><strong><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);font-size:14px;margin-right:8px;vertical-align:middle;">${seedIcon}</span>${data.seedTitle}</strong><p>${data.seedText}</p><div class="t">${data.seedNote}</div></div>
+        <div class="branches">
+          ${data.options.map((o,i)=>`
+            <div class="branch">
+              <div class="opt ${o.cls||''} ${(state.path[stepNo-1] && state.path[stepNo-1].id===o.id)?'active':''}" data-step="${stepNo}" data-index="${i}">
+                <div class="top">Opzione ${i+1}</div>
+                <strong><span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);font-size:14px;margin-right:8px;vertical-align:middle;">${o.next.kind==='whatsapp'?'💬':o.next.kind==='setter'?'📞':'✉️'}</span>${o.title}</strong>
+                <p>${o.text}</p>
+                <div class="otag">${o.tag}</div>
+              </div>
+            </div>`).join('')}
+        </div>`;
+      block.classList.add('show');
+      block.querySelectorAll('.opt').forEach(opt => opt.addEventListener('click', ()=>{
+        const step = Number(opt.dataset.step);
+        const index = Number(opt.dataset.index);
+        const fresh = stepData(step, state.emailId, state.path);
+        const chosen = fresh.options[index];
+        state.path = state.path.slice(0, step-1);
+        state.path.push(chosen);
+        renderAll();
+        const next = document.getElementById(`stepBlock${step+1}`);
+        if(next) next.scrollIntoView({behavior:'smooth', block:'start'});
+      }));
+    }
+
+    function detectTouch(last){
+      if(last.next.kind === 'whatsapp') return 'WhatsApp';
+      if(last.next.kind === 'setter' || last.next.kind === 'final') return 'Operativo';
+      return 'Email';
+    }
+
+    function buildTouch(last){
+      if(last.next.kind === 'whatsapp'){
+        return waShell('💬 WhatsApp attivato', `${last.next.sampleWa || 'Ciao, ho visto che hai approfondito il contenuto che ti abbiamo inviato…'}\n\nEsempio messaggio: “Ti scrivo perché ho visto che hai dato un’occhiata con attenzione al contenuto. Se ti va, possiamo capire insieme se ha senso approfondire il prossimo passo.”`);
+      }
+      if(last.next.kind === 'setter'){
+        return crmShell([
+          {icon:'📞', title:'Setter attivato', text:'Da qui il lead entra in lavorazione commerciale con obiettivo chiamata di vendita.'},
+          {icon:'GO', title:'Obiettivo', text:'Portare il lead alla call nel momento più favorevole.'}
+        ]);
+      }
+      if(last.next.kind === 'final'){
+        return crmShell([
+          {icon:'FX', title:'Stato finale', text:`Il lead ha raggiunto lo stato: ${last.next.status}.`}
+        ]);
+      }
+      const e = getEmail(last.next.emailId || state.emailId);
+      const variant = last.next.variant ? ` • Variante ${last.next.variant}` : '';
+      return emailShell(e, `✉️ ${e.day} • ${e.phase}${variant}`, `Esempio oggetto: ${last.next.sampleSubject || e.subject}\n\nIl funnel prosegue con il touchpoint più coerente rispetto al comportamento appena osservato.`, 'Continuazione del funnel');
+    }
+
+    function buildOutcome(last){
+      if(last.next.kind === 'whatsapp'){
+        return waShell('💬 Messaggio WhatsApp contestuale', 'Ciao, ti scrivo perché ho visto che hai approfondito il contenuto che ti abbiamo inviato. Volevo capire se ha senso sentirci per vedere meglio a che punto sei e se questo step può esserti utile davvero.');
+      }
+      if(last.next.kind === 'setter'){
+        return crmShell([
+          {icon:'📞', title:'Task setter creato', text:'Il lead passa al setter solo dopo compilazione form.'},
+          {icon:'GO', title:'Obiettivo setter', text:'Portare il lead alla chiamata di vendita.'},
+          {icon:'TM', title:'Timing', text:'La presa in carico avviene nella finestra più utile.'}
+        ]);
+      }
+      if(last.next.kind === 'final'){
+        return crmShell(finalItems(last.next.status));
+      }
+      const e = getEmail(last.next.emailId || state.emailId);
+      const v = last.next.variant ? `Variante ${last.next.variant}` : 'Variante dinamica';
+      return emailShell(e, `✉️ ${e.day} • ${v}`, 'La prossima email cambia in base all’azione appena compiuta dal lead. Non esiste un solo follow-up fisso: ogni step ha la sua variante coerente.', 'Next touchpoint');
+    }
+
+    function buildFinal(last){
+      if(last.next.kind === 'final') return crmShell(finalItems(last.next.status));
+      if(last.next.kind === 'setter') return crmShell([{icon:'📞', title:'Lead in mano al setter', text:'Il funnel ha portato il lead al momento commerciale corretto.'}]);
+      if(last.next.kind === 'whatsapp') return crmShell([{icon:'💬', title:'Lead in ramo caldo', text:'Il contatto è passato dal solo nurturing a un touchpoint più diretto.'}]);
+      return crmShell([{icon:'✉️', title:'Lead ancora nel funnel', text:'Il contatto continua a essere lavorato tramite la variante corretta del follow-up successivo.'}]);
+    }
+
+    function renderTouchAndOutcome(){
+      const currentEmail = getEmail(state.emailId);
+      let touchHtml = emailShell(currentEmail, `${currentEmail.day} • ${currentEmail.phase}`, currentEmail.body, currentEmail.cta);
+      let touchPill = 'Email';
+      let outcomeHtml = `<div class="email-shell"><div class="subject">Seleziona una prima azione</div><div class="meta">Step 1</div><div class="body">Scegli uno dei quattro comportamenti disponibili. Il funnel aprirà il passo successivo in modo coerente con la scelta fatta.</div><div class="cta-chip">Il funnel è pronto</div></div>`;
+      let outcomePill = 'In attesa';
+      let timeline = [[currentEmail.day, `${currentEmail.name} è il punto di partenza`]];
+      let finalHtml = `<div class="email-shell"><div class="subject">Lead in ingresso</div><div class="meta">Nessun esito ancora selezionato</div><div class="body">Il lead è appena entrato nel funnel. Il suo stato finale dipenderà dalle scelte che selezionerai negli step.</div><div class="cta-chip">Start</div></div>`;
+
+      if(state.path.length){
+        const last = state.path[state.path.length-1];
+        timeline = last.timeline;
+        outcomeHtml = buildOutcome(last);
+        outcomePill = last.tag;
+        touchHtml = buildTouch(last);
+        touchPill = detectTouch(last);
+        finalHtml = buildFinal(last);
+      }
+
+      document.getElementById('touchArea').innerHTML = touchHtml;
+      document.getElementById('touchPill').textContent = touchPill;
+      document.getElementById('outcomeArea').innerHTML = outcomeHtml;
+      document.getElementById('outcomePill').textContent = outcomePill;
+      document.getElementById('timelineList').innerHTML = timeline.map(t => `<div class="timeline-row"><strong>${t[0]}</strong><span>${t[1]}</span></div>`).join('');
+      document.getElementById('finalStateBox').innerHTML = finalHtml;
+    }
+
+    function renderAll(){
+      const currentEmail = getEmail(state.emailId);
+      document.getElementById('stageTitle').textContent = `${currentEmail.name}: scegli il comportamento del lead e guarda come si apre il funnel.`;
+      document.getElementById('stageDesc').textContent = 'Ogni step mostra le opzioni reali disponibili. Ogni selezione apre il passaggio successivo e aggiorna il touchpoint, la timeline, l’azione operativa e lo stato finale del lead.';
+      document.getElementById('stagePill').textContent = state.path.length ? `Ramo attivo: ${state.path[state.path.length-1].title}` : 'In attesa di scelta';
+
+      renderPicker();
+      for(let i=1;i<=11;i++) renderStepBlock(i);
+      for(let i=2;i<=11;i++){
+        if(state.path.length < i-1){
+          const el = document.getElementById(`stepBlock${i}`);
+          if(el){ el.classList.remove('show'); el.innerHTML=''; }
+        }
+      }
+
+      renderTouchAndOutcome();
+      document.getElementById('statusBox').innerHTML = state.path.length
+        ? `<strong>Stato:</strong> hai selezionato <strong>${state.path[state.path.length-1].title}</strong>. ${state.path.length < 11 ? 'Ora puoi aprire lo step successivo.' : 'Hai completato il percorso mostrato.'}`
+        : '<strong>Stato:</strong> pronto. Scegli una email e poi seleziona una delle quattro azioni nello step 1.';
+    }
+
+    document.getElementById('resetBtn').addEventListener('click', ()=>{ state.path=[]; renderAll(); });
+    document.getElementById('backBtn').addEventListener('click', ()=>{ state.path.pop(); renderAll(); });
+
+    renderAll();
+  </script>
+</body>
+</html>
